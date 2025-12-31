@@ -2,104 +2,139 @@
 <html lang="fa">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MTFOOTBALL</title>
+
 <style>
-body{font-family:tahoma;background:#0f2027;color:#fff;text-align:center}
-.container{background:#fff;color:#000;max-width:500px;margin:20px auto;padding:20px;border-radius:12px}
-button{padding:10px;width:90%;margin:5px;font-size:16px;cursor:pointer}
+body{font-family:tahoma;background:#0f2027;color:#fff;text-align:center;margin:0}
+.container{background:#fff;color:#000;max-width:520px;margin:20px auto;padding:20px;border-radius:14px}
+button,input,select{width:90%;padding:12px;margin:6px;font-size:16px}
+button{cursor:pointer;border:none;border-radius:6px}
+.admin{background:#dc3545;color:#fff}
+.blue{background:#007bff;color:#fff}
 .hidden{display:none}
 </style>
 </head>
 <body>
 
+<!-- انتخاب نوع ورود -->
 <div class="container" id="authPage">
-  <h3>👤 مربیان</h3>
-  <button onclick="showRegister()">ثبت‌نام مربی</button>
-  <button onclick="showLogin()">ورود مربی</button>
+  <h3>⚽ MTFOOTBALL</h3>
+  <button class="blue" onclick="showRegister()">ثبت‌نام مربی</button>
+  <button class="blue" onclick="showLogin()">ورود مربی</button>
+  <button class="admin" onclick="showAdmin()">ورود ادمین</button>
 </div>
 
+<!-- ثبت نام مربی -->
 <div class="container hidden" id="registerPage">
   <h3>📝 ثبت‌نام مربی</h3>
-  <input id="regName" placeholder="نام مربی"><br>
-  <input id="regPass" type="password" placeholder="رمز عبور"><br>
-  <button onclick="registerCoach()">ثبت‌نام</button>
+  <input id="regName" placeholder="نام مربی">
+  <input id="regPass" type="password" placeholder="رمز عبور">
+  <button class="blue" onclick="registerCoach()">ثبت‌نام</button>
 </div>
 
+<!-- ورود مربی -->
 <div class="container hidden" id="loginPage">
   <h3>🔑 ورود مربی</h3>
-  <input id="loginName" placeholder="نام مربی"><br>
-  <input id="loginPass" type="password" placeholder="رمز عبور"><br>
-  <button onclick="loginCoach()">ورود</button>
+  <input id="loginName" placeholder="نام مربی">
+  <input id="loginPass" type="password" placeholder="رمز عبور">
+  <button class="blue" onclick="loginCoach()">ورود</button>
 </div>
 
+<!-- انتخاب تیم -->
 <div class="container hidden" id="teamPage">
   <h3 id="welcome"></h3>
-  <select id="teamSelect"></select><br>
-  <button onclick="chooseTeam()">انتخاب تیم</button>
+  <select id="teamSelect"></select>
+  <button class="blue" onclick="chooseTeam()">انتخاب تیم</button>
+</div>
+
+<!-- پنل ادمین -->
+<div class="container hidden" id="adminPage">
+  <h3>🔐 ورود ادمین</h3>
+  <input id="adminPass" type="password" placeholder="رمز ادمین">
+  <button class="admin" onclick="adminLogin()">ورود ادمین</button>
+  <div id="adminPanel"></div>
 </div>
 
 <script>
-const teams=['پرسپولیس','استقلال','سپاهان','تراکتور'];
-let coaches=JSON.parse(localStorage.getItem('coaches'))||{};
-let chosen=JSON.parse(localStorage.getItem('chosen'))||{};
-let currentCoach='';
+/* تنظیمات */
+const ADMIN_PASSWORD = 'mtfootball-admin';
+const teams = ['پرسپولیس','استقلال','سپاهان','تراکتور','فولاد'];
+
+/* داده‌ها */
+let coaches = JSON.parse(localStorage.getItem('coaches')) || {};
+let chosen  = JSON.parse(localStorage.getItem('chosen'))  || {};
+let currentCoach = '';
 
 function save(){
  localStorage.setItem('coaches',JSON.stringify(coaches));
  localStorage.setItem('chosen',JSON.stringify(chosen));
 }
 
-function showRegister(){
+/* نمایش صفحات */
+function hideAll(){
  authPage.classList.add('hidden');
- registerPage.classList.remove('hidden');
-}
-
-function showLogin(){
- authPage.classList.add('hidden');
- loginPage.classList.remove('hidden');
-}
-
-function registerCoach(){
- const n=regName.value.trim();
- const p=regPass.value.trim();
- if(!n||!p) return alert('همه فیلدها پر شود');
- if(coaches[n]) return alert('این مربی قبلا ثبت شده');
- coaches[n]=p;
- save();
- alert('ثبت‌نام موفق');
  registerPage.classList.add('hidden');
- authPage.classList.remove('hidden');
+ loginPage.classList.add('hidden');
+ teamPage.classList.add('hidden');
+ adminPage.classList.add('hidden');
 }
 
+function showRegister(){ hideAll(); registerPage.classList.remove('hidden'); }
+function showLogin(){ hideAll(); loginPage.classList.remove('hidden'); }
+function showAdmin(){ hideAll(); adminPage.classList.remove('hidden'); }
+
+/* ثبت نام مربی */
+function registerCoach(){
+ const n = regName.value.trim();
+ const p = regPass.value.trim();
+ if(!n || !p) return alert('همه فیلدها الزامی است');
+ if(coaches[n]) return alert('این مربی قبلا ثبت شده');
+ coaches[n] = p;
+ save();
+ alert('ثبت‌نام انجام شد');
+ hideAll(); authPage.classList.remove('hidden');
+}
+
+/* ورود مربی */
 function loginCoach(){
- const n=loginName.value.trim();
- const p=loginPass.value.trim();
- if(coaches[n]!==p) return alert('نام یا رمز اشتباه');
- currentCoach=n;
- welcome.innerText=`سلام ${n} 👋 تیم خودتو انتخاب کن`;
- loginPage.classList.add('hidden');
- teamPage.classList.remove('hidden');
+ const n = loginName.value.trim();
+ const p = loginPass.value.trim();
+ if(coaches[n] !== p) return alert('نام یا رمز اشتباه است');
+ currentCoach = n;
+ welcome.innerText = `سلام ${n} 👋 تیم خودتو انتخاب کن`;
+ hideAll(); teamPage.classList.remove('hidden');
  renderTeams();
 }
 
+/* نمایش تیم‌ها */
 function renderTeams(){
- teamSelect.innerHTML='<option value="">انتخاب تیم</option>';
+ teamSelect.innerHTML = '<option value="">انتخاب تیم</option>';
  teams.forEach(t=>{
   if(!chosen[t]){
-   let o=document.createElement('option');
+   const o=document.createElement('option');
    o.value=t; o.textContent=t;
    teamSelect.appendChild(o);
   }
  });
 }
 
+/* انتخاب تیم */
 function chooseTeam(){
- if(!teamSelect.value) return alert('تیم انتخاب کن');
- chosen[teamSelect.value]=currentCoach;
+ if(!teamSelect.value) return alert('یک تیم انتخاب کن');
+ chosen[teamSelect.value] = {by:'coach',name:currentCoach};
  save();
- alert('تیم ثبت شد');
- teamPage.classList.add('hidden');
- authPage.classList.remove('hidden');
+ alert('تیم با موفقیت ثبت شد');
+ hideAll(); authPage.classList.remove('hidden');
+}
+
+/* ورود ادمین */
+function adminLogin(){
+ if(adminPass.value !== ADMIN_PASSWORD) return alert('رمز ادمین اشتباه است');
+ adminPanel.innerHTML = '<h4>لیست تیم‌های انتخاب‌شده</h4>';
+ Object.keys(chosen).forEach(t=>{
+  adminPanel.innerHTML += `<div>${t} ➜ ${chosen[t].name}</div>`;
+ });
 }
 </script>
 
