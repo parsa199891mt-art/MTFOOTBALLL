@@ -76,7 +76,8 @@
       div.innerHTML=${badge}<b>${team}</b> ➜ ${v.label}${v.coachName? ' | مربی: '+v.coachName:''};
       chosenList.appendChild(div);
     });
-  }function chooseTeam(){
+  }
+  function chooseTeam(){
     if(!teamSelect.value) return alert('یک تیم انتخاب کن');
     chosen[teamSelect.value]={by:'coach',label:'قفل شده توسط مربی',coachName:currentCoach};
     save(); renderSelect(); renderList(); teamPage.classList.add('hidden'); coachPage.classList.remove('hidden'); coachName.value='';
