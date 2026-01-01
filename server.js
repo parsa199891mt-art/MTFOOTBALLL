@@ -1,73 +1,58 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 
-const app = express();                      // ← خط ۳: ساخت اپ Express
-const PORT = process.env.PORT || 3000;      // ← خط ۴: پورت از متغیر محیطی یا 3000
-
-// گرفتن رمز ادمین از متغیر محیطی یا مقدار پیش‌فرض
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "mtfootball-admin";
-
+const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-const dataFile = path.join(__dirname, 'teams.json');
+// --- تنظیمات اولیه ---
+const ADMIN_PASSWORD = 'mtfootball-admin';
+const iranLeagueTeams = [
+  'پرسپولیس','استقلال','سپاهان','تراکتور','فولاد','ذوب‌آهن','گل‌گهر',
+  'آلومینیوم','ملوان','نساجی','پیکان','هوادار',
+  'استقلال خوزستان','صنعت نفت','مس رفسنجان','شمس‌آذر'
+];
 
-// گرفتن لیست تیم‌ها
+// --- داده‌ها در حافظه (localStorage سرور نداریم، همه چیز تو RAM میمونه)
+let coaches = {}; // مربی‌ها
+let chosen = {}; // تیم‌های انتخاب شده
+let currentCoach = '';
+
+// --- API برای گرفتن همه تیم‌ها
 app.get('/teams', (req, res) => {
-  try {
-    const data = fs.readFileSync(dataFile, 'utf8');
-    res.json(JSON.parse(data));
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Error reading teams file' });
-  }
+  res.json(chosen);
 });
 
-// انتخاب تیم توسط بازیکن
+// --- API انتخاب تیم توسط مربی
 app.post('/select', (req, res) => {
   const { team, coach } = req.body;
-  try {
-    const data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
-
-    if (!data[team]) return res.json({ success: false, message: 'Team not found' });
-    if (data[team].status !== 'free') return res.json({ success: false, message: 'Team already taken' });
-
-    data[team].status = 'taken';
-    data[team].coach = coach || '';
-
-    fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Error updating teams file' });
-  }
+  if (!team || !coach) return res.json({ success: false, message: 'اطلاعات ناقص' });
+  if (chosen[team]) return res.json({ success: false, message: 'تیم قبلاً انتخاب شده' });
+  chosen[team] = { by: 'coach', label: 'قفل شده توسط مربی', coachName: coach };
+  res.json({ success: true });
 });
 
-// عملیات ادمین (reserve / lock_admin / free)
+// --- API ادمین
 app.post('/admin', (req, res) => {
-  const { team, action, password } = req.body;
+  const { team, action, password, name } = req.body;
+  if (password !== ADMIN_PASSWORD) return res.json({ success: false, message: 'رمز غلط' });
 
-  if (password !== ADMIN_PASSWORD) return res.json({ success: false, message: 'Wrong admin password' });
+  if (!iranLeagueTeams.includes(team)) return res.json({ success: false, message: 'تیم نامعتبر' });
 
-  try {
-    const data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+  if (action === 'reserve') chosen[team] = { by: 'admin', label: 'رزرو شده', name };
+  else if (action === 'lock_admin') chosen[team] = { by: 'admin', label: 'قفل شده توسط ادمین' };
+  else if (action === 'free') delete chosen[team];
+  else return res.json({ success: false, message: 'عملیات نامعتبر' });
 
-    if (!data[team]) return res.json({ success: false, message: 'Team not found' });
-
-    if (action === 'reserve') data[team].status = 'reserved';
-    else if (action === 'lock_admin') data[team].status = 'locked_admin';
-    else if (action === 'free') {
-      data[team].status = 'free';
-      data[team].coach = '';
-    } else return res.json({ success: false, message: 'Invalid action' });
-
-    fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Error updating teams file' });
-  }
+  res.json({ success: true });
 });
 
-// ← شروع سرور (اصلاح‌شده)
-app.listen(PORT, () => {
-  console.log(Server running at http://localhost:${PORT});
+// --- تنظیمات عمومی
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+// --- پورت و هاست لیارا
+const PORT = process.env.PORT || 3000;
+const HOST = '0.0.0.0';
+app.listen(PORT, HOST, () => console.log(`Server running on http://${HOST}:${PORT}`));
