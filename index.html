@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTFOOTBALL | انتخاب تیم لیگ ایران</title>
+<style>
+body{font-family:Tahoma;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);margin:0;color:#fff;text-align:center}
+header{padding:20px;font-size:26px;font-weight:bold;background:rgba(0,0,0,.4)}
+.container{max-width:560px;margin:25px auto;background:#fff;color:#000;padding:20px;border-radius:14px}
+input,select,button{width:90%;padding:12px;margin:8px 0;font-size:16px}
+button{background:#007bff;color:#fff;border:none;border-radius:6px;cursor:pointer}
+button.admin{background:#dc3545}
+button.gray{background:#6c757d}
+button.green{background:#28a745}
+button.orange{background:#fd7e14}
+.hidden{display:none}
+.team{background:#fff;color:#000;padding:12px;margin:10px;border-radius:10px}
+.row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+small.badge{padding:4px 8px;border-radius:10px;background:#eee}
+</style>
+</head>
+<body>
+
+<header>⚽ MTFOOTBALL</header>
+
+<div class="container" id="authPage">
+  <button onclick="showRegister()">ثبت نام مربی</button>
+  <button onclick="showLogin()">ورود مربی</button>
+  <button class="admin" onclick="showAdmin()">ورود ادمین</button>
+</div>
+
+<div class="container hidden" id="registerPage">
+  <input id="regName" placeholder="نام مربی">
+  <input id="regPass" type="password" placeholder="رمز">
+  <button onclick="registerCoach()">ثبت نام</button>
+</div>
+
+<div class="container hidden" id="loginPage">
+  <input id="loginName" placeholder="نام مربی">
+  <input id="loginPass" type="password" placeholder="رمز">
+  <button onclick="loginCoach()">ورود</button>
+</div>
+
+<div class="container hidden" id="teamPage">
+  <h3 id="welcome"></h3>
+  <select id="teamSelect"></select>
+  <button onclick="chooseTeam()">انتخاب تیم</button>
+</div>
+
+<div class="container hidden" id="adminPage">
+  <input type="password" id="adminPass" placeholder="رمز ادمین">
+  <button class="admin" onclick="adminLogin()">ورود ادمین</button>
+  <div id="adminPanel" class="hidden"></div>
+</div>
+
+<div id="chosenList"></div>
+
+<script>
+const ADMIN_PASSWORD='mtfootball-admin';
+
+const iranLeagueTeams=[
+'پرسپولیس','استقلال','سپاهان','تراکتور','فولاد','ذوب‌آهن','گل‌گهر',
+'آلومینیوم','ملوان','نساجی','پیکان','هوادار',
+'استقلال خوزستان','صنعت نفت','مس رفسنجان','شمس‌آذر'
+];
+
+let coaches=JSON.parse(localStorage.getItem('coaches'))||{};
+let chosen=JSON.parse(localStorage.getItem('mtfootball_chosen'))||{};
+let currentCoach='';
+
+function save(){
+ localStorage.setItem('coaches',JSON.stringify(coaches));
+ localStorage.setItem('mtfootball_chosen',JSON.stringify(chosen));
+}
+
+function hideAll(){
+ authPage.classList.add('hidden');
+ registerPage.classList.add('hidden');
+ loginPage.classList.add('hidden');
+ teamPage.classList.add('hidden');
+ adminPage.classList.add('hidden');
+}
+
+function showRegister(){hideAll();registerPage.classList.remove('hidden')}
+function showLogin(){hideAll();loginPage.classList.remove('hidden')}
+function showAdmin(){hideAll();adminPage.classList.remove('hidden')}
+
+function registerCoach(){
+ const n=regName.value.trim(),p=regPass.value.trim();
+ if(!n||!p) return alert('اطلاعات ناقص');
+ if(coaches[n]) return alert('قبلا ثبت شده');
+ coaches[n]=p; save(); hideAll(); authPage.classList.remove('hidden');
+}
+
+function loginCoach(){
+ const n=loginName.value.trim(),p=loginPass.value.trim();
+ if(coaches[n]!==p) return alert('اشتباه');
+ currentCoach=n;
+ welcome.innerText=`سلام ${n} 👋 تیم خودتو انتخاب کن`;
+ hideAll(); teamPage.classList.remove('hidden');
+ renderSelect();
+}
+
+function renderSelect(){
+ teamSelect.innerHTML='<option value="">انتخاب تیم</option>';
+ iranLeagueTeams.forEach(t=>{
+  if(!chosen[t]){
+   const o=document.createElement('option');
+   o.value=t;o.textContent=t;
+   teamSelect.appendChild(o);
+  }
+ });
+}
+
+function chooseTeam(){
+ if(!teamSelect.value) return alert('انتخاب کن');
+ chosen[teamSelect.value]={by:'coach',label:'قفل شده توسط مربی',coachName:currentCoach};
+ save(); renderList(); hideAll(); authPage.classList.remove('hidden');
+}
+
+function renderList(){
+ chosenList.innerHTML='';
+ Object.keys(chosen).forEach(team=>{
+  const v=chosen[team];
+  const d=document.createElement('div');
+  d.className='team';
+  const b=v.by==='coach'
+   ?'<small class="badge">مربی</small>'
+   :'<small class="badge">ادمین</small>';
+  d.innerHTML=`${b} <b>${team}</b> ➜ ${v.label} ${v.coachName||''}`;
+  chosenList.appendChild(d);
+ });
+}
+
+function adminLogin(){
+ if(adminPass.value!==ADMIN_PASSWORD) return alert('رمز غلط');
+ adminPanel.classList.remove('hidden');
+ adminPanel.innerHTML='<h4>مدیریت تیم‌ها</h4>';
+ iranLeagueTeams.forEach(t=>{
+  const w=document.createElement('div');
+  w.className='team';
+  w.innerHTML=`<b>${t}</b>`;
+  const r=document.createElement('div');
+  r.className='row';
+  if(!chosen[t]){
+   r.append(btn('قفل ادمین','admin',()=>setAdmin(t,'قفل شده توسط ادمین')));
+  }else{
+   r.append(
+    btn('رزرو','gray',()=>setAdmin(t,'رزرو شده')),
+    btn('مثل مربی','orange',()=>setCoachLike(t)),
+    btn('آزاد','green',()=>unlock(t))
+   );
+  }
+  w.appendChild(r); adminPanel.appendChild(w);
+ });
+}
+
+function btn(t,c,f){
+ const b=document.createElement('button');
+ b.textContent=t;b.className=c;b.onclick=f;return b;
+}
+
+function setAdmin(t,l){chosen[t]={by:'admin',label:l};save();renderList();adminLogin()}
+function setCoachLike(t){chosen[t]={by:'coach',label:'قفل شده توسط مربی'};save();renderList();adminLogin()}
+function unlock(t){delete chosen[t];save();renderList();adminLogin()}
+
+renderList();
+</script>
+
+</body>
+</html>
