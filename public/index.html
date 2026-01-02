@@ -63,7 +63,6 @@ footer{background:rgba(0,0,0,.4);padding:15px;font-size:14px;margin-top:30px}
 
 <script>
 const ADMIN_PASSWORD='mtfootball-admin';
-
 const iranLeagueTeams=[
 'پرسپولیس','استقلال','سپاهان','تراکتور','فولاد','ذوب‌آهن','گل‌گهر سیرجان',
 'آلومینیوم اراک','ملوان بندرانزلی','نساجی مازندران','پیکان','هوادار',
@@ -71,13 +70,7 @@ const iranLeagueTeams=[
 ];
 
 let coaches=JSON.parse(localStorage.getItem('coaches'))||{};
-let chosen=JSON.parse(localStorage.getItem('mtfootball_chosen'))||{};
 let currentCoach='';
-
-function save(){
- localStorage.setItem('coaches',JSON.stringify(coaches));
- localStorage.setItem('mtfootball_chosen',JSON.stringify(chosen));
-}
 
 function hideAll(){
  authPage.classList.add('hidden');
@@ -95,7 +88,8 @@ function registerCoach(){
  const n=regName.value.trim(),p=regPass.value.trim();
  if(!n||!p) return alert('اطلاعات ناقص');
  if(coaches[n]) return alert('قبلا ثبت شده');
- coaches[n]=p; save(); hideAll(); authPage.classList.remove('hidden');
+ coaches[n]=p; localStorage.setItem('coaches',JSON.stringify(coaches));
+ hideAll(); authPage.classList.remove('hidden');
 }
 
 function loginCoach(){
@@ -107,77 +101,96 @@ function loginCoach(){
  renderSelect();
 }
 
-function renderSelect(){
- teamSelect.innerHTML='<option value="">انتخاب تیم</option>';
- iranLeagueTeams.forEach(t=>{
-  if(!chosen[t]){
-   const o=document.createElement('option');
-   o.value=t;o.textContent=t;
-   teamSelect.appendChild(o);
+// انتخاب تیم و نمایش سراسری
+async function renderSelect(){
+  teamSelect.innerHTML='<option value="">انتخاب تیم</option>';
+  const res = await fetch('/api/teams');
+  const chosen = await res.json();
+
+  iranLeagueTeams.forEach(t=>{
+    if(!chosen[t]){
+      const o=document.createElement('option');
+      o.value=t;
+      o.textContent=t;
+      teamSelect.appendChild(o);
+    }
+  });
+
+  renderList(chosen);
+}
+
+async function chooseTeam(){
+  if(!teamSelect.value) return alert('انتخاب کن');
+  const res = await fetch('/api/choose', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({team: teamSelect.value, coachName: currentCoach, label:'قفل شده توسط مربی'})
+  });
+  const data = await res.json();
+  if(data.success){
+    alert('تیم با موفقیت انتخاب شد');
+    renderSelect();
+  } else {
+    alert(data.message || 'خطا');
   }
- });
 }
 
-function chooseTeam(){
- if(!teamSelect.value) return alert('انتخاب کن');
- chosen[teamSelect.value]={by:'coach',label:'قفل شده توسط مربی',coachName:currentCoach};
- save(); renderList(); hideAll(); authPage.classList.remove('hidden');
+function renderList(chosenData){
+  chosenList.innerHTML='';
+  const data = chosenData || {};
+  Object.keys(data).forEach(team=>{
+    const v=data[team];
+    const d=document.createElement('div');
+    d.className='team';
+    d.innerHTML=`<small class="badge">مربی</small> <b>${team}</b> ➜ ${v.label}${v.name ? ' | '+v.name : ''}${v.coachName ? ' | مربی: '+v.coachName : ''}`;
+    chosenList.appendChild(d);
+  });
 }
 
-function renderList(){
- chosenList.innerHTML='';
- Object.keys(chosen).forEach(team=>{
-  const v=chosen[team];
-  const d=document.createElement('div');
-  d.className='team';
-  const b=v.by==='coach'
-   ?'<small class="badge">مربی</small>'
-   :'<small class="badge">ادمین</small>';
-  d.innerHTML=`${b} <b>${team}</b> ➜ ${v.label}${v.name ? ' | '+v.name : ''}${v.coachName ? ' | مربی: '+v.coachName : ''}`;
-  chosenList.appendChild(d);
- });
-}
-
+// پنل ادمین ساده
 function adminLogin(){
- if(adminPass.value!==ADMIN_PASSWORD) return alert('رمز غلط');
- adminPanel.classList.remove('hidden');
- adminPanel.innerHTML='<h4>مدیریت تیم‌ها</h4>';
- iranLeagueTeams.forEach(t=>{
-  const w=document.createElement('div');
-  w.className='team';
-  w.innerHTML=`<b>${t}</b>`;
-  const r=document.createElement('div');
-  r.className='row';
-  if(!chosen[t]){
-   r.append(btn('قفل ادمین','admin',()=>setAdmin(t,'قفل شده توسط ادمین')));
-   r.append(btn('رزرو به نام','gray',()=>reserveByName(t)));
-  }else{
-   r.append(
-    btn('رزرو به نام','gray',()=>reserveByName(t)),
-    btn('مثل مربی','orange',()=>setCoachLike(t)),
-    btn('آزاد','green',()=>unlock(t))
-   );
+  if(adminPass.value!==ADMIN_PASSWORD) return alert('رمز غلط');
+  adminPanel.classList.remove('hidden');
+  adminPanel.innerHTML='<h4>مدیریت تیم‌ها</h4>';
+
+  iranLeagueTeams.forEach(t=>{
+    const w=document.createElement('div');
+    w.className='team';
+    w.innerHTML=`<b>${t}</b>`;
+    const r=document.createElement('div');
+    r.className='row';
+
+    r.append(btn('قفل ادمین','admin',()=>adminAction(t,'lock')));
+    r.append(btn('رزرو به نام','gray',()=>adminAction(t,'reserve')));
+    r.append(btn('آزاد','green',()=>adminAction(t,'unlock')));
+    w.appendChild(r);
+    adminPanel.appendChild(w);
+  });
+}
+
+function btn(text,className,fn){
+  const b=document.createElement('button');
+  b.textContent=text;
+  b.className=className;
+  b.onclick=fn;
+  return b;
+}
+
+async function adminAction(team,action){
+  let name='';
+  if(action==='reserve'){
+    name = prompt('رزرو به نام چه کسی؟');
+    if(!name) return;
   }
-  w.appendChild(r); adminPanel.appendChild(w);
- });
+  await fetch('/api/admin',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({team, action, name})
+  });
+  renderSelect();
 }
 
-function btn(t,c,f){
- const b=document.createElement('button');
- b.textContent=t;b.className=c;b.onclick=f;return b;
-}
-
-function setAdmin(t,l){chosen[t]={by:'admin',label:l};save();renderList();adminLogin()}
-function setCoachLike(t){chosen[t]={by:'coach',label:'قفل شده توسط مربی'};save();renderList();adminLogin()}
-function reserveByName(t){
- const name=prompt('رزرو به نام چه کسی؟');
- if(!name) return;
- chosen[t]={by:'admin',label:'رزرو شده',name:name};
- save();renderList();adminLogin()
-}
-function unlock(t){delete chosen[t];save();renderList();adminLogin()}
-
-renderList();
+renderSelect();
 </script>
 
 </body>
