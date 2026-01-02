@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTFOOTBALL | انتخاب تیم لیگ ایران</title>
+
+<style>
+body{
+  font-family:Tahoma;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  margin:0;
+  color:#fff;
+  text-align:center
+}
+header{
+  padding:20px;
+  font-size:26px;
+  font-weight:bold;
+  background:rgba(0,0,0,.4)
+}
+.container{
+  max-width:540px;
+  margin:25px auto;
+  background:#fff;
+  color:#000;
+  padding:20px;
+  border-radius:14px
+}
+input,select,button{
+  width:90%;
+  padding:12px;
+  margin:8px 0;
+  font-size:16px
+}
+button{
+  background:#007bff;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer
+}
+.team{
+  background:#fff;
+  color:#000;
+  padding:10px;
+  margin:10px auto;
+  border-radius:10px;
+  max-width:520px
+}
+footer{
+  background:rgba(0,0,0,.4);
+  padding:15px;
+  font-size:14px;
+  margin-top:30px
+}
+</style>
+</head>
+
+<body>
+
+<header>⚽ MTFOOTBALL</header>
+
+<div class="container">
+  <h3>انتخاب تیم لیگ برتر ایران</h3>
+
+  <input id="name" placeholder="نام مربی">
+
+  <select id="team">
+    <option value="">انتخاب تیم</option>
+    <option>پرسپولیس</option>
+    <option>استقلال</option>
+    <option>سپاهان</option>
+    <option>تراکتور</option>
+    <option>فولاد</option>
+    <option>ذوب‌آهن</option>
+    <option>گل‌گهر سیرجان</option>
+    <option>آلومینیوم اراک</option>
+    <option>ملوان بندرانزلی</option>
+    <option>نساجی مازندران</option>
+    <option>پیکان</option>
+    <option>هوادار</option>
+    <option>استقلال خوزستان</option>
+    <option>صنعت نفت آبادان</option>
+    <option>مس رفسنجان</option>
+    <option>شمس‌آذر قزوین</option>
+  </select>
+
+  <button onclick="saveTeam()">ثبت تیم</button>
+</div>
+
+<div id="list"></div>
+
+<footer>
+© MTFOOTBALL
+</footer>
+
+<script>
+let teamsData = JSON.parse(localStorage.getItem('mtfootball_teams')) || [];
+
+function saveTeam(){
+  const name = document.getElementById('name').value.trim();
+  const team = document.getElementById('team').value;
+
+  if(!name || !team){
+    alert('همه فیلدها را پر کن');
+    return;
+  }
+
+  if(teamsData.find(t => t.team === team)){
+    alert('این تیم قبلاً انتخاب شده');
+    return;
+  }
+
+  teamsData.push({ name, team });
+  localStorage.setItem('mtfootball_teams', JSON.stringify(teamsData));
+  render();
+}
+
+function render(){
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+
+  teamsData.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'team';
+    div.innerHTML = `<b>${item.team}</b> | مربی: ${item.name}`;
+    list.appendChild(div);
+  });
+}
+
+render();
+</script>
+
+</body>
+</html>
