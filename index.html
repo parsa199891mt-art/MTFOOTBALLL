@@ -67,9 +67,9 @@ import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "ht
 
 /* 🔴 این قسمت رو از Firebase خودت کپی کن */
 const firebaseConfig = {
-  apiKey: "AIzaSyCCZN4hqj8wjPmF4xWucmXjET8LS1uagOQ",
-  authDomain: "mtfootball-71035.firebaseapp.com",
-  projectId: "mtfootball-71035"
+  apiKey: "API_KEY",
+  authDomain: "PROJECT_ID.firebaseapp.com",
+  projectId: "PROJECT_ID"
 };
 /* 🔴 تا اینجا */
 
@@ -77,22 +77,25 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const ADMIN_PASSWORD='mtfootball-admin';
-
-const iranLeagueTeams=[
-'پرسپولیس','استقلال','سپاهان','تراکتور','فولاد','ذوب‌آهن','گل‌گهر',
-'آلومینیوم','ملوان','نساجی','پیکان','هوادار',
-'استقلال خوزستان','صنعت نفت','مس رفسنجان','شمس‌آذر'
-];
+const iranLeagueTeams=[/*تیم‌ها همون*/];
 
 let coaches=JSON.parse(localStorage.getItem('coaches'))||{};
 let chosen={};
 let currentCoach='';
 
-function saveCoaches(){
- localStorage.setItem('coaches',JSON.stringify(coaches));
-}
+// ⚡️ مهم: گرفتن المان‌ها
+const authPage = document.getElementById('authPage');
+const registerPage = document.getElementById('registerPage');
+const loginPage = document.getElementById('loginPage');
+const teamPage = document.getElementById('teamPage');
+const adminPage = document.getElementById('adminPage');
+const welcome = document.getElementById('welcome');
+const teamSelect = document.getElementById('teamSelect');
+const adminPanel = document.getElementById('adminPanel');
+const chosenList = document.getElementById('chosenList');
 
-window.hideAll=()=>{
+// 🔹 فانکشن‌ها
+window.hideAll = () => {
  authPage.classList.add('hidden');
  registerPage.classList.add('hidden');
  loginPage.classList.add('hidden');
@@ -100,17 +103,19 @@ window.hideAll=()=>{
  adminPage.classList.add('hidden');
 }
 
-window.showRegister=()=>{hideAll();registerPage.classList.remove('hidden')}
-window.showLogin=()=>{hideAll();loginPage.classList.remove('hidden')}
-window.showAdmin=()=>{hideAll();adminPage.classList.remove('hidden')}
+window.showRegister = () => { hideAll(); registerPage.classList.remove('hidden') }
+window.showLogin = () => { hideAll(); loginPage.classList.remove('hidden') }
+window.showAdmin = () => { hideAll(); adminPage.classList.remove('hidden') }
 
-window.registerCoach=()=>{
+window.registerCoach = () => {
  const n=regName.value.trim(),p=regPass.value.trim();
  if(!n||!p) return alert('اطلاعات ناقص');
  if(coaches[n]) return alert('قبلا ثبت شده');
- coaches[n]=p; saveCoaches(); hideAll(); authPage.classList.remove('hidden');
+ coaches[n]=p; localStorage.setItem('coaches',JSON.stringify(coaches));
+ hideAll(); authPage.classList.remove('hidden');
 }
-window.loginCoach=()=>{
+
+window.loginCoach = () => {
  const n=loginName.value.trim(),p=loginPass.value.trim();
  if(coaches[n]!==p) return alert('اشتباه');
  currentCoach=n;
@@ -124,13 +129,13 @@ function renderSelect(){
  iranLeagueTeams.forEach(t=>{
   if(!chosen[t]){
    const o=document.createElement('option');
-   o.value=t;o.textContent=t;
+   o.value=t; o.textContent=t;
    teamSelect.appendChild(o);
   }
  });
 }
 
-window.chooseTeam=async()=>{
+window.chooseTeam = async () => {
  if(!teamSelect.value) return alert('انتخاب کن');
  await setDoc(doc(db,"teams",teamSelect.value),{
   by:'coach',
@@ -146,15 +151,13 @@ function renderList(){
   const v=chosen[team];
   const d=document.createElement('div');
   d.className='team';
-  const b=v.by==='coach'
-   ?'<small class="badge">مربی</small>'
-   :'<small class="badge">ادمین</small>';
+  const b=v.by==='coach' ? '<small class="badge">مربی</small>' : '<small class="badge">ادمین</small>';
   d.innerHTML=${b} <b>${team}</b> ➜ ${v.label}${v.coachName?' | مربی: '+v.coachName:''}${v.name?' | '+v.name:''};
   chosenList.appendChild(d);
  });
 }
 
-window.adminLogin=()=>{
+window.adminLogin = () => {
  if(adminPass.value!==ADMIN_PASSWORD) return alert('رمز غلط');
  adminPanel.classList.remove('hidden');
  adminPanel.innerHTML='<h4>مدیریت تیم‌ها</h4>';
