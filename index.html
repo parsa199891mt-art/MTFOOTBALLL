@@ -110,12 +110,11 @@ window.registerCoach=()=>{
  if(coaches[n]) return alert('قبلا ثبت شده');
  coaches[n]=p; saveCoaches(); hideAll(); authPage.classList.remove('hidden');
 }
-
 window.loginCoach=()=>{
  const n=loginName.value.trim(),p=loginPass.value.trim();
  if(coaches[n]!==p) return alert('اشتباه');
  currentCoach=n;
- welcome.innerText=`سلام ${n} 👋 تیم خودتو انتخاب کن`;
+ welcome.innerText=سلام ${n} 👋 تیم خودتو انتخاب کن;
  hideAll(); teamPage.classList.remove('hidden');
  renderSelect();
 }
@@ -150,7 +149,7 @@ function renderList(){
   const b=v.by==='coach'
    ?'<small class="badge">مربی</small>'
    :'<small class="badge">ادمین</small>';
-  d.innerHTML=`${b} <b>${team}</b> ➜ ${v.label}${v.coachName?' | مربی: '+v.coachName:''}${v.name?' | '+v.name:''}`;
+  d.innerHTML=${b} <b>${team}</b> ➜ ${v.label}${v.coachName?' | مربی: '+v.coachName:''}${v.name?' | '+v.name:''};
   chosenList.appendChild(d);
  });
 }
@@ -162,7 +161,7 @@ window.adminLogin=()=>{
  iranLeagueTeams.forEach(t=>{
   const w=document.createElement('div');
   w.className='team';
-  w.innerHTML=`<b>${t}</b>`;
+  w.innerHTML=<b>${t}</b>;
   const r=document.createElement('div');
   r.className='row';
   r.append(btn('رزرو به نام','gray',()=>reserveByName(t)));
