@@ -1,275 +1,62 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MTFOOTBALL | انتخاب تیم لیگ ایران</title>
-<style>
-body{font-family:Tahoma, sans-serif;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);margin:0;color:#fff;text-align:center}
-header{padding:20px;font-size:26px;font-weight:bold;background:rgba(0,0,0,.4)}
-.container{max-width:560px;margin:18px auto;background:#fff;color:#000;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-input,select,button{width:90%;padding:10px;margin:8px 0;font-size:15px}
-button{background:#007bff;color:#fff;border:none;border-radius:6px;cursor:pointer}
-button.admin{background:#dc3545}
-button.gray{background:#6c757d}
-button.green{background:#28a745}
-button.orange{background:#fd7e14}
-.hidden{display:none}
-.team{background:#fff;color:#000;padding:12px;margin:10px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.12)}
-.row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
-small.badge{display:inline-block;padding:4px 8px;border-radius:10px;background:#eee;margin-right:6px}
-#chosenList{max-width:700px;margin:12px auto}
-footer{background:rgba(0,0,0,.4);padding:12px;font-size:14px;margin-top:22px;color:#fff}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>تیم‌های لیگ ایران | MTFOOTBALL</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<header>⚽ MTFOOTBALL | انتخاب تیم لیگ ایران</header>
+  <header class="site-header">
+    <div class="logo">⚽ MTFOOTBALL</div>
+    <h1>تیم‌های لیگ ایران</h1>
+  </header>
 
-<!-- صفحه انتخاب اولیه -->
-<div class="container" id="authPage">
-  <button onclick="showRegister()">ثبت نام مربی</button>
-  <button onclick="showLogin()">ورود مربی</button>
-  <button class="admin" onclick="showAdmin()">ورود ادمین</button>
-</div>
+  <main class="container">
+    <section id="teamsGrid" class="teams-grid" aria-live="polite"></section>
+  </main>
 
-<!-- ثبت نام مربی -->
-<div class="container hidden" id="registerPage">
-  <h3>📝 ثبت نام مربی</h3>
-  <input id="regName" placeholder="نام مربی">
-  <input id="regPass" type="password" placeholder="رمز">
-  <button onclick="registerCoach()">ثبت نام</button>
-</div>
+  <!-- Modal: انتخاب ثبت‌نام یا ورود و فرم‌ها -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content">
+      <button id="modalClose" class="modal-close" title="بستن">✕</button>
 
-<!-- ورود مربی -->
-<div class="container hidden" id="loginPage">
-  <h3>🔑 ورود مربی</h3>
-  <input id="loginName" placeholder="نام مربی">
-  <input id="loginPass" type="password" placeholder="رمز">
-  <button onclick="loginCoach()">ورود</button>
-</div>
+      <div id="modalStepChoice" class="modal-step">
+        <h3>برای رزرو تیم انتخاب کن</h3>
+        <p id="modalTeamName" class="modal-team"></p>
+        <div class="modal-actions">
+          <button id="toRegisterBtn" class="btn primary">ثبت‌نام مربی</button>
+          <button id="toLoginBtn" class="btn">ورود مربی</button>
+        </div>
+      </div>
 
-<!-- انتخاب تیم -->
-<div class="container hidden" id="teamPage">
-  <h3 id="welcome"></h3>
-  <select id="teamSelect"></select>
-  <button onclick="chooseTeam()">انتخاب تیم</button>
-</div>
+      <div id="modalRegister" class="modal-step hidden">
+        <h3>ثبت‌نام مربی</h3>
+        <input id="reg_username" placeholder="نام کاربری (مثلا: ali)" autocomplete="username">
+        <input id="reg_password" type="password" placeholder="رمز عبور" autocomplete="new-password">
+        <div class="modal-actions">
+          <button id="doRegister" class="btn primary">ثبت‌نام و رزرو</button>
+          <button id="backFromRegister" class="btn">بازگشت</button>
+        </div>
+        <p class="note">اگر قبلاً ثبت‌نام کردی از بخش ورود استفاده کن.</p>
+      </div>
 
-<!-- پنل ادمین (ورود) -->
-<div class="container hidden" id="adminPage">
-  <h3>🔐 ورود ادمین</h3>
-  <input type="password" id="adminPass" placeholder="رمز ادمین">
-  <button class="admin" onclick="adminLogin()">ورود ادمین</button>
-  <div id="adminPanel" class="hidden"></div>
-</div>
+      <div id="modalLogin" class="modal-step hidden">
+        <h3>ورود مربی</h3>
+        <input id="login_username" placeholder="نام کاربری" autocomplete="username">
+        <input id="login_password" type="password" placeholder="رمز عبور" autocomplete="current-password">
+        <div class="modal-actions">
+          <button id="doLogin" class="btn primary">ورود و رزرو</button>
+          <button id="backFromLogin" class="btn">بازگشت</button>
+        </div>
+      </div>
 
-<!-- لیست انتخاب‌شده‌ها -->
-<div id="chosenList"></div>
+    </div>
+  </div>
 
-<footer>حق نشر © MTFOTBALL</footer>
+  <footer class="site-footer">حق نشر © MTFOTBALL</footer>
 
-<!-- Firebase + اپلیکیشن -->
-<script type="module">
-/* ---------- Firebase imports ---------- */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  doc,
-  setDoc,
-  deleteDoc,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
-/* 🔴 جایگزین کن با firebaseConfig پروژه خودت */
-const firebaseConfig = {
-  apiKey: "AIzaSyCCZN4hqj8wjPmF4xWucmXjET8LS1uagOQ",
-  authDomain: "mtfootball-71035.firebaseapp.com",
-  projectId: "mtfootball-71035"
-};
-/* -------------------------------------- */
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* ---------- تنظیمات محلی و DOM ---------- */
-const ADMIN_PASSWORD = 'mtfootball-admin';
-
-const iranLeagueTeams = [
-  'پرسپولیس','استقلال','سپاهان','تراکتور','فولاد','ذوب‌آهن','گل‌گهر',
-  'آلومینیوم','ملوان','نساجی','پیکان','هوادار',
-  'استقلال خوزستان','صنعت نفت','مس رفسنجان','شمس‌آذر'
-];
-
-let coaches = JSON.parse(localStorage.getItem('coaches')) || {};
-let chosen = {};         // داده‌های لایو از Firestore
-let currentCoach = '';
-
-/* Refs به المان‌ها */
-const authPage = document.getElementById('authPage');
-const registerPage = document.getElementById('registerPage');
-const loginPage = document.getElementById('loginPage');
-const teamPage = document.getElementById('teamPage');
-const adminPage = document.getElementById('adminPage');
-const adminPanel = document.getElementById('adminPanel');
-const chosenList = document.getElementById('chosenList');
-const teamSelect = document.getElementById('teamSelect');
-const welcomeEl = document.getElementById('welcome');
-
-function saveCoaches(){ localStorage.setItem('coaches', JSON.stringify(coaches)); }
-
-/* ---------- نمایش/پنهان صفحات (در دسترس با onclick‌های HTML) ---------- */
-window.hideAll = function(){
-  authPage.classList.add('hidden');
-  registerPage.classList.add('hidden');
-  loginPage.classList.add('hidden');
-  teamPage.classList.add('hidden');
-  adminPage.classList.add('hidden');
-};
-window.showRegister = function(){ hideAll(); registerPage.classList.remove('hidden'); };
-window.showLogin = function(){ hideAll(); loginPage.classList.remove('hidden'); };
-window.showAdmin = function(){ hideAll(); adminPage.classList.remove('hidden'); };
-
-/* ---------- ثبت‌نام / ورود مربی (localStorage برای حساب‌ها) ---------- */
-window.registerCoach = function(){
-  const n = document.getElementById('regName').value.trim();
-  const p = document.getElementById('regPass').value.trim();
-  if(!n || !p) return alert('اطلاعات ناقص است');
-  if(coaches[n]) return alert('این مربی قبلا ثبت شده');
-  coaches[n] = p;
-  saveCoaches();
-  alert('ثبت‌نام با موفقیت انجام شد');
-  hideAll(); authPage.classList.remove('hidden');
-};
-
-window.loginCoach = function(){
-  const n = document.getElementById('loginName').value.trim();
-  const p = document.getElementById('loginPass').value.trim();
-  if(coaches[n] !== p) return alert('نام یا رمز اشتباه است');
-  currentCoach = n;
-  welcomeEl.innerText = `سلام ${n} 👋 تیم خودتو انتخاب کن`;
-  hideAll(); teamPage.classList.remove('hidden');
-  renderSelect();
-};
-
-/* ---------- رندر لیست انتخاب‌ها و select ---------- */
-function renderSelect(){
-  teamSelect.innerHTML = '<option value="">انتخاب تیم</option>';
-  iranLeagueTeams.forEach(t => {
-    if(!chosen[t]){
-      const o = document.createElement('option');
-      o.value = t; o.textContent = t;
-      teamSelect.appendChild(o);
-    }
-  });
-}
-
-function renderList(){
-  chosenList.innerHTML = '';
-  Object.keys(chosen).forEach(team => {
-    const v = chosen[team];
-    const d = document.createElement('div');
-    d.className = 'team';
-    const badge = v.by === 'coach' ? '<small class="badge">مربی</small>' : '<small class="badge">ادمین</small>';
-    const coachPart = v.coachName ? ` | مربی: ${v.coachName}` : '';
-    const namePart = v.name ? ` | ${v.name}` : '';
-    d.innerHTML = `${badge} <b>${team}</b> ➜ ${v.label || ''}${namePart}${coachPart}`;
-    chosenList.appendChild(d);
-  });
-}
-
-/* ---------- عملیات انتخاب/رزرو/آزادسازی با Firestore ---------- */
-window.chooseTeam = async function(){
-  const team = teamSelect.value;
-  if(!team) return alert('یک تیم انتخاب کن');
-  try{
-    await setDoc(doc(db, "teams", team), {
-      by: 'coach',
-      label: 'قفل شده توسط مربی',
-      coachName: currentCoach
-    });
-    alert('تیم با موفقیت انتخاب شد');
-    hideAll(); authPage.classList.remove('hidden');
-  }catch(e){
-    alert('خطا در ذخیره‌سازی: ' + e.message);
-  }
-};
-
-async function setAdminState(team, label){
-  try{
-    await setDoc(doc(db, "teams", team), { by: 'admin', label, name: null, coachName: null });
-  }catch(e){ console.error(e); alert('خطا: '+e.message); }
-}
-async function setCoachLike(team){
-  try{
-    await setDoc(doc(db, "teams", team), { by: 'coach', label: 'قفل شده توسط مربی', coachName: null, name: null });
-  }catch(e){ console.error(e); alert('خطا: '+e.message); }
-}
-async function unlockTeam(team){
-  try{
-    await deleteDoc(doc(db, "teams", team));
-  }catch(e){ console.error(e); alert('خطا: '+e.message); }
-}
-
-/* ---------- پنل ادمین و امکانات مدیریتی ---------- */
-window.adminLogin = function(){
-  const pass = document.getElementById('adminPass').value;
-  if(pass !== ADMIN_PASSWORD) return alert('رمز ادمین اشتباه است');
-  adminPanel.classList.remove('hidden');
-  adminPanel.innerHTML = '<h4>مدیریت تیم‌ها</h4>';
-  iranLeagueTeams.forEach(t => {
-    const w = document.createElement('div'); w.className = 'team';
-    w.innerHTML = `<b>${t}</b>`;
-    const r = document.createElement('div'); r.className = 'row';
-    const state = chosen[t];
-    if(!state){
-      // در حالت آزاد: قفل ادمین + رزرو به نام
-      r.append(btn('قفل ادمین','admin',()=>setAdminState(t,'قفل شده توسط ادمین')));
-      r.append(btn('رزرو به نام','gray',()=>reserveByName(t)));
-    } else if(state.by === 'coach'){
-      // اگر مربی انتخاب کرده: امکان مثل مربی (تبدیل)، رزرو، آزاد
-      r.append(btn('رزرو به نام','gray',()=>reserveByName(t)));
-      r.append(btn('مثل مربی','orange',()=>setCoachLike(t)));
-      r.append(btn('آزاد','green',()=>unlockTeam(t)));
-    } else { // admin
-      r.append(btn('رزرو به نام','gray',()=>reserveByName(t)));
-      r.append(btn('قفل ادمین','admin',()=>setAdminState(t,'قفل شده توسط ادمین')));
-      r.append(btn('مثل مربی','orange',()=>setCoachLike(t)));
-      r.append(btn('آزاد','green',()=>unlockTeam(t)));
-    }
-    w.appendChild(r); adminPanel.appendChild(w);
-  });
-};
-
-/* کمک‌کننده برای ساخت دکمه‌ها */
-function btn(text, cls, fn){
-  const b = document.createElement('button');
-  b.textContent = text; b.className = cls; b.onclick = fn;
-  return b;
-}
-
-/* رزرو به نام */
-async function reserveByName(team){
-  const name = prompt('رزرو به نام چه کسی؟');
-  if(!name) return;
-  try{
-    await setDoc(doc(db, "teams", team), { by: 'admin', label: 'رزرو شده', name: name });
-  }catch(e){ console.error(e); alert('خطا: '+e.message); }
-}
-
-/* ---------- Realtime listener: همگام‌سازی لحظه‌ای ---------- */
-onSnapshot(collection(db, "teams"), snapshot => {
-  chosen = {};
-  snapshot.forEach(d => chosen[d.id] = d.data());
-  renderList();
-  renderSelect();
-});
-
-/* initial render (در صورت نبودن داده‌ها) */
-renderList();
-renderSelect();
-
-</script>
+  <script src="app.js"></script>
 </body>
 </html>
