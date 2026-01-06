@@ -1,0 +1,61 @@
+:root{
+  --bg:#0f172a;
+  --card:#071024;
+  --accent:#38bdf8;
+  --primary:#007bff;
+  --text:#e6eef8;
+  --muted:#94a3b8;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Tahoma, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+body{background:linear-gradient(135deg,var(--bg),#203a43);color:var(--text);direction:rtl}
+.site-header{padding:28px 16px 8px;text-align:center}
+.logo{font-size:20px;margin-bottom:6px}
+h1{margin:0;font-size:22px;color:var(--text)}
+
+.container{max-width:1100px;margin:18px auto;padding:12px}
+.teams-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:16px;
+}
+
+/* کارت تیم */
+.team-card{
+  background:var(--card);
+  border:1px solid rgba(255,255,255,0.04);
+  padding:16px;
+  border-radius:12px;
+  text-align:center;
+  box-shadow:0 6px 18px rgba(2,6,23,0.45);
+  transition:transform .18s ease,box-shadow .18s;
+}
+.team-card:hover{transform:translateY(-6px);box-shadow:0 18px 30px rgba(2,6,23,0.6)}
+.team-name{font-size:18px;margin-bottom:8px}
+.team-status{display:inline-block;padding:6px 10px;border-radius:999px;font-size:13px}
+.status-free{background:#16a34a;color:#fff}      /* آزاد */
+.status-locked{background:#ef4444;color:#fff}    /* قفل شده */
+.status-reserved{background:#f59e0b;color:#000}  /* رزرو شده */
+
+/* دکمه‌ها */
+.btn{
+  display:inline-block;padding:10px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.06);color:var(--text);cursor:pointer;margin:6px 4px;font-size:14px;
+}
+.btn.primary{background:var(--primary);color:#fff}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+
+/* modal */
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);z-index:60}
+.modal.hidden{display:none}
+.modal-content{width:96%;max-width:420px;background:#061223;padding:18px;border-radius:12px;position:relative;border:1px solid rgba(255,255,255,0.03)}
+.modal-close{position:absolute;left:10px;top:8px;background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer}
+.modal-step{padding-top:6px}
+.modal-step h3{margin:6px 0 10px}
+.modal-team{font-weight:700;margin-bottom:8px}
+.modal-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+input{width:100%;padding:10px;margin:8px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.03);border-radius:8px;color:var(--text);font-size:14px}
+.note{color:var(--muted);font-size:13px;text-align:center;margin-top:8px}
+
+/* footer */
+.site-footer{text-align:center;padding:16px;color:var(--muted);font-size:13px;margin-top:22px}
