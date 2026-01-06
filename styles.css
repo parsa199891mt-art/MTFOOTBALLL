@@ -5,45 +5,47 @@
   --primary:#007bff;
   --text:#e6eef8;
   --muted:#94a3b8;
+  --danger:#ef4444;
 }
 
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Tahoma, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+html,body{height:100%;margin:0;font-family:Tahoma, "Segoe UI", Roboto, Arial;}
 body{background:linear-gradient(135deg,var(--bg),#203a43);color:var(--text);direction:rtl}
-.site-header{padding:28px 16px 8px;text-align:center}
-.logo{font-size:20px;margin-bottom:6px}
-h1{margin:0;font-size:22px;color:var(--text)}
 
+/* header */
+.site-header{display:flex;gap:12px;align-items:center;justify-content:center;padding:18px 12px;position:relative}
+.logo{font-size:18px}
+h1{margin:0;font-size:20px}
+.admin-toggle{position:absolute;left:12px;top:12px}
+
+/* layout */
 .container{max-width:1100px;margin:18px auto;padding:12px}
 .teams-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
   gap:16px;
+  align-items:start;
 }
 
-/* کارت تیم */
+/* card */
 .team-card{
   background:var(--card);
   border:1px solid rgba(255,255,255,0.04);
-  padding:16px;
-  border-radius:12px;
-  text-align:center;
-  box-shadow:0 6px 18px rgba(2,6,23,0.45);
-  transition:transform .18s ease,box-shadow .18s;
+  padding:16px;border-radius:12px;text-align:center;
+  box-shadow:0 6px 18px rgba(2,6,23,0.45);transition:transform .18s,box-shadow .18s;
 }
 .team-card:hover{transform:translateY(-6px);box-shadow:0 18px 30px rgba(2,6,23,0.6)}
-.team-name{font-size:18px;margin-bottom:8px}
+.team-name{font-size:16px;margin-bottom:8px}
 .team-status{display:inline-block;padding:6px 10px;border-radius:999px;font-size:13px}
-.status-free{background:#16a34a;color:#fff}      /* آزاد */
-.status-locked{background:#ef4444;color:#fff}    /* قفل شده */
-.status-reserved{background:#f59e0b;color:#000}  /* رزرو شده */
+.status-free{background:#16a34a;color:#fff}
+.status-locked{background:var(--danger);color:#fff}
+.status-reserved{background:#f59e0b;color:#000}
 
-/* دکمه‌ها */
-.btn{
-  display:inline-block;padding:10px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.06);color:var(--text);cursor:pointer;margin:6px 4px;font-size:14px;
-}
+/* buttons & inputs */
+.btn{display:inline-block;padding:8px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.04);color:var(--text);cursor:pointer;margin:6px 4px;font-size:14px}
 .btn.primary{background:var(--primary);color:#fff}
 .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+input{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:var(--text)}
 
 /* modal */
 .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);z-index:60}
@@ -51,11 +53,35 @@ h1{margin:0;font-size:22px;color:var(--text)}
 .modal-content{width:96%;max-width:420px;background:#061223;padding:18px;border-radius:12px;position:relative;border:1px solid rgba(255,255,255,0.03)}
 .modal-close{position:absolute;left:10px;top:8px;background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer}
 .modal-step{padding-top:6px}
-.modal-step h3{margin:6px 0 10px}
-.modal-team{font-weight:700;margin-bottom:8px}
 .modal-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
-input{width:100%;padding:10px;margin:8px 0;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.03);border-radius:8px;color:var(--text);font-size:14px}
 .note{color:var(--muted);font-size:13px;text-align:center;margin-top:8px}
+
+/* admin panel slide-in */
+.admin-panel{
+  position:fixed;right:0;top:0;height:100%;width:340px;background:#071428;border-left:1px solid rgba(255,255,255,0.03);
+  box-shadow:-8px 0 30px rgba(2,6,23,0.6);padding:12px;z-index:80;transform:translateX(100%);transition:transform .28s;
+}
+.admin-panel.visible{transform:translateX(0)}
+.admin-header{display:flex;align-items:center;justify-content:space-between}
+.admin-body{margin-top:12px;overflow:auto;padding-bottom:40px}
+.admin-section{margin-bottom:14px}
+.teams-edit-list{max-height:320px;overflow:auto;border:1px dashed rgba(255,255,255,0.03);padding:8px;border-radius:8px}
+.team-edit-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.team-edit-row input{flex:1;padding:8px}
+
+/* block overlay */
+.block-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);z-index:100}
+.block-overlay.hidden{display:none}
+.block-box{background:#041227;padding:20px;border-radius:12px;text-align:center;width:92%;max-width:420px;border:1px solid rgba(255,255,255,0.03)}
+.block-actions{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.small-note{color:var(--muted);font-size:13px;margin-top:8px}
 
 /* footer */
 .site-footer{text-align:center;padding:16px;color:var(--muted);font-size:13px;margin-top:22px}
+
+/* responsive mobile */
+@media (max-width:640px){
+  .teams-grid{grid-template-columns:repeat(1,1fr);padding:6px}
+  .admin-panel{width:100%;max-width:100%;bottom:0;right:0;left:0;top:auto;height:60%;transform:translateY(100%)}
+  .admin-panel.visible{transform:translateY(0)}
+}
