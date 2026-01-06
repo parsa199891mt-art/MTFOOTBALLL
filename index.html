@@ -8,16 +8,29 @@
 </head>
 <body>
 
+  <div id="blockOverlay" class="block-overlay hidden" aria-hidden="true">
+    <div class="block-box">
+      <h2>دسترسی مسدود است</h2>
+      <p>متاسفانه دسترسی از کشور شما به این سایت مجاز نیست.</p>
+      <div class="block-actions">
+        <input id="adminOverridePass" type="password" placeholder="رمز ادمین برای ورود">
+        <button id="adminOverrideBtn" class="btn primary">ورود ادمین</button>
+      </div>
+      <p class="small-note">اگر ادمین هستید، رمز را وارد کنید تا دسترسی پیدا کنید.</p>
+    </div>
+  </div>
+
   <header class="site-header">
     <div class="logo">⚽ MTFOOTBALL</div>
-    <h1>تیم‌های لیگ ایران</h1>
+    <h1 id="leagueTitle">تیم‌های لیگ ایران</h1>
+    <button id="openAdminBtn" class="btn ghost admin-toggle">پنل ادمین</button>
   </header>
 
   <main class="container">
     <section id="teamsGrid" class="teams-grid" aria-live="polite"></section>
   </main>
 
-  <!-- Modal: انتخاب ثبت‌نام یا ورود و فرم‌ها -->
+  <!-- Modal: ثبت نام / ورود -->
   <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content">
       <button id="modalClose" class="modal-close" title="بستن">✕</button>
@@ -54,6 +67,44 @@
 
     </div>
   </div>
+
+  <!-- Admin panel (گرافیکی، slide-in) -->
+  <aside id="adminPanel" class="admin-panel hidden" aria-hidden="true">
+    <div class="admin-header">
+      <h3>پنل ادمین</h3>
+      <button id="closeAdmin" class="btn ghost">بستن</button>
+    </div>
+
+    <div class="admin-body">
+      <div class="admin-section">
+        <label>رمز ادمین</label>
+        <input id="adminPassInput" type="password" placeholder="رمز ادمین">
+        <button id="adminLoginBtn" class="btn primary">ورود</button>
+      </div>
+
+      <div id="adminTools" class="admin-tools hidden">
+        <div class="admin-section">
+          <label>نام لیگ</label>
+          <input id="leagueNameInput" type="text">
+          <button id="saveLeagueName" class="btn">ذخیره نام لیگ</button>
+        </div>
+
+        <div class="admin-section">
+          <label>ویرایش نام تیم‌ها</label>
+          <div id="teamsEditList" class="teams-edit-list"></div>
+          <button id="saveTeamNames" class="btn">ذخیره اسامی تیم‌ها</button>
+          <button id="resetTeams" class="btn ghost">بازیابی پیش‌فرض</button>
+        </div>
+
+        <div class="admin-section">
+          <label>عملیات مدیریتی</label>
+          <button id="unlockAll" class="btn">آزادسازی همه تیم‌ها</button>
+          <button id="exportData" class="btn">خروجی JSON</button>
+        </div>
+      </div>
+
+    </div>
+  </aside>
 
   <footer class="site-footer">حق نشر © MTFOTBALL</footer>
 
